@@ -1,0 +1,122 @@
+/* style.css
+ * This file provides css styles.
+ */
+
+body,html {
+	background-color: #3b4b54; width : 100%;
+	height: 100%;
+	margin: 0 auto;
+	font-family: "HelveticaNeue-Light", "Helvetica Neue Light", "Helvetica Neue", Helvetica, Arial, "Lucida Grande", sans-serif;
+	/*color: #ffffff;*/
+}
+
+body{
+	background-color: #f6f6f6;
+	color: #333333;
+}
+
+a {
+	text-decoration: none;
+	color: #00aed1;
+}
+
+a:hover {
+	text-decoration: underline;
+}
+
+.newappIcon {
+	padding-top: 10%;
+	display: block;
+	margin: 0 auto;
+	padding-bottom: 2em;
+	max-width:200px;
+}
+
+h1 {
+	font-weight: bold;
+	font-size: 2em;
+}
+
+.leftHalf {
+	float: left;
+	background-color: #26343f;
+	width: 45%;
+	height: 100%;
+}
+
+.rightHalf {
+	float: right;
+	width: 55%;
+	background-color: #313f4a;
+	height: 100%;
+	overflow:auto;
+}
+
+.blue {
+	color: #00aed1;
+}
+
+.env-var {
+	text-align: right;
+	border-right: 1px solid #000;
+	width: 30%;
+}
+
+pre {
+	padding: 0;
+	margin: 0;
+}
+
+
+#header{
+	background-color: #ff3333;
+	width: 100%;
+	height: 45px;
+	color: #ffffff;
+	text-align: center;
+	padding-top: 18px;=
+}
+
+#header span{
+	margin-top: 50%;
+	font-weight: 800;
+}
+
+.transferir{
+	margin-top: 10px;
+	width: 100%;
+	height: 60%;
+	background-color: #d0d0d0;
+	color: #f6f6f6
+	box-shadow: none;
+}
+.formTransf form span input{
+	/*display: inline-flex;*/
+	margin-right: 10px;
+	margin-top: 2px;
+	margin-bottom: 2px;
+	font-size: 14px;
+	padding-left: 5px;
+}
+
+
+.formTransf form span{
+	display: flex;
+	flex-wrap: wrap;
+	margin-top: 5px;
+	margin-bottom: 5px;
+}
+
+.formTransf form{
+	display: flex;
+	flex-direction: row;
+	flex-wrap: wrap;
+	justify-content: center;
+	align-content: center;
+}
+
+
+
+.formTransf{
+	padding: 15px 15px 15px 15px;
+}

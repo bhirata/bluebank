@@ -1,0 +1,22 @@
+{
+  "name": "NodejsStarterApp",
+  "version": "0.0.1",
+  "private": true,
+  "scripts": {
+    "start": "node app.js"
+  },
+  "dependencies": {
+    "body-parser": "^1.16.1",
+    "cfenv": "1.0.x",
+    "express": "4.13.x",
+    "http": "0.0.0",
+    "ibm_db": "^1.0.2",
+    "node-env-file": "^0.1.8",
+    "promise": "^7.1.1",
+    "vcap_services": "^0.2.0"
+  },
+  "repository": {},
+  "engines": {
+    "node": "4.x"
+  }
+}
