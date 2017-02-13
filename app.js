@@ -1,9 +1,5 @@
 /*eslint-env node*/
 
-//------------------------------------------------------------------------------
-// node.js starter application for Bluemix
-//------------------------------------------------------------------------------
-
 // This application uses express as its web server
 // for more info, see: http://expressjs.com
 var express = require('express');
@@ -30,9 +26,10 @@ app.use(bodyParser.urlencoded({
     extended: true
 }));
 
-var dbName = "bluebank";
+//nome da tabela
+var tableName = "bluebank";
 
-// var credentials = require(__dirname + '/config/credentials.js');
+// Credenciais são lidas do .env
 var credentials = function () {
     var localEnv = {};
     var dashCredentials;
@@ -58,6 +55,9 @@ var credentials = function () {
 
 var ibmdb = require('ibm_db');
 
+// getAccount recebe como parametro o nome da tabela onde irá executar o sql, a agencia e a conta informadas pelo usuario
+// Caso encontre a conta do usuario, retornará a agencia, conta e saldo
+// Caso contrário, resultará em erro de Conta inexistente
 var getAccount = function (db, agencia, conta) {
     return new Promise(function (resolve, reject) {
         ibmdb.open(credentials().connectionString, function (err, conn) {
@@ -92,6 +92,11 @@ var getAccount = function (db, agencia, conta) {
     });
 };
 
+
+//calcSaldo recebe como parametro um objeto com contas de origem e destino e o valor a ser transferido
+// Realiza a verificacao da viabilidade da transação. Caso o valor a ser transferdo seja maior do que o saldo, então não permitirá a transação
+// e resultara erro de Saldo insuficiente
+// Caso tenha saldo suficiente para a transação, então será calculado o novo saldo para ambas as partes e em seguida atualizado no objeto contas.
 var calcSaldo = function (contas, montante) {
     return new Promise (function (resolve, reject) {
         var novoSaldo = 0;
@@ -115,6 +120,8 @@ var calcSaldo = function (contas, montante) {
     });
 };
 
+
+// set Saldo recebe como parametro o nome da tabela que irá atualizar o saldo além de receber um objeto com as contas de origem e destino contendo os saldos atualizados
 var setSaldo = function (db, contas) {
     return new Promise(function (resolve, reject) {
         ibmdb.open(credentials().connectionString, function (err, conn) {
@@ -158,7 +165,7 @@ app.post('/select', function (req, res) {
             res.status(400).json({message: err.message});
         }
         else {
-            var query = "select * from "+ dbName;
+            var query = "select * from "+ tableName;
             console.log(query);
             conn.query(
                 query, function (err, rows) {
@@ -177,43 +184,22 @@ app.post('/select', function (req, res) {
     });
 });
 
-app.get('/where', function (req, res) {
-    ibmdb.open(credentials().connectionString, function (err, conn) {
-        if(err){
-            res.status(400).json({message: err.message});
-        }
-        else {
-            var agencia = "1000";
-            var conta = "2";
-            var query = "select * from " + dbName + " where agencia="+ agencia + " and conta=" + conta;
-            console.log(query);
-            conn.query(
-                query, function (err, rows) {
-                    if (!err){
-                        res.json(rows);
-                    }
-                    else {
-                        res.status(400).json({message: err.message});
-                    }
-                    conn.close(function () {
-                        console.log("Connection Closed");
-                    })
-                }
-            );
-        }
-    })
-});
 
+//Função utilizada para resetar as contas para o saldo 10
 app.post('/reset', function (req, res) {
     var obj = { remetente: { ID: 1, CPF: '20000000000', AGENCIA: 1000, CONTA: 2, SALDO: 10 },
         destinatario: { ID: 2, CPF: '10000000000', AGENCIA: 1000, CONTA: 1, SALDO: 10 } };
 
-    setSaldo(dbName, obj).then(
+    setSaldo(tableName, obj).then(
         res.send("Reset")
     );
 });
 
-
+//Recebe como parametro um objeto contendo as contas de origem e destino e o valor a ser transferido
+//Atribui o valor a ser transferido a variavel montante
+//Depois busca no banco de dados as contas informadas. Tendo algum erro, retorna erro de Conta inexistente
+//Caso as contas informadas existam, então é calculado o novo saldo e, em seguida, atualizado o saldo de ambas as contas
+//assim efetivando a transação.
 app.post('/transfere', function (req, res) {
     var contas = {};
     var montante = 0;
@@ -221,10 +207,10 @@ app.post('/transfere', function (req, res) {
     console.log(req.body);
     montante = req.body.valor;
 
-    getAccount(dbName, req.body.remetente.agencia, req.body.remetente.conta)
+    getAccount(tableName, req.body.remetente.agencia, req.body.remetente.conta)
         .then(function (account) {
                 contas.remetente = account;
-                return getAccount(dbName, req.body.destinatario.agencia, req.body.destinatario.conta);
+                return getAccount(tableName, req.body.destinatario.agencia, req.body.destinatario.conta);
             }, function () {
                 console.log("Conta Origem Inexistente");
                 res.status(400).json({error: "Conta Origem Inexistente"});
@@ -236,13 +222,13 @@ app.post('/transfere', function (req, res) {
         res.status(400).json({error: "Conta Destino Inexistente"});
         console.log("Conta Destino Inexistente");
     }).then(function (contas) {
-        return setSaldo(dbName, contas);
+        return setSaldo(tableName, contas);
     }, function () {
         res.status(400).json({error: "Saldo insuficiente para realizar a transacao"});
         console.log("Saldo insuficiente para realizar a transacao");
     }).then(function(){
         console.log("Foi");
-        res.status(200).send("Foi");
+        res.status(200).send("Transferência Realizada com sucesso");
     });
 });
 
